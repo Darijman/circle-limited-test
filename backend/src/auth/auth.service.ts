@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from "@nestjs/common";
+import { Injectable, UnauthorizedException, BadRequestException, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { JwtService } from "@nestjs/jwt";
 import { RegisterDto } from "./dto/register.dto";
@@ -10,6 +10,8 @@ import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
@@ -31,16 +33,17 @@ export class AuthService {
       return this.generateToken(user.id);
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        this.logger.warn(`Register failed: email already exists`);
         throw new BadRequestException("User already exists");
       }
 
+      this.logger.error(`Register error`, error.stack);
       throw error;
     }
   }
 
   async login(dto: LoginDto): Promise<AuthResponse> {
     const { email, password } = dto;
-
     const user = await this.prisma.user.findUnique({ where: { email } });
 
     const passwordToCompare = user?.password ?? "$2b$10$invalidsaltinvalidsaltinv.uZ0X9e";
@@ -54,10 +57,10 @@ export class AuthService {
 
   private async generateToken(userId: string): Promise<AuthResponse> {
     const payload: JwtPayload = { id: userId };
-    const accessToken = await this.jwtService.signAsync(payload);
+    const access_token = await this.jwtService.signAsync(payload);
 
     return {
-      accessToken,
+      access_token,
     };
   }
 }

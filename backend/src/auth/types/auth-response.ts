@@ -1,3 +1,3 @@
 export interface AuthResponse {
-  accessToken: string;
+  access_token: string;
 }
