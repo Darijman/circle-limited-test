@@ -8,12 +8,7 @@ export const TaskEvents = {
   DELETED: "task.deleted",
 } as const;
 
-@WebSocketGateway({
-  cors: {
-    origin: "http://localhost:5173",
-    credentials: true,
-  },
-})
+@WebSocketGateway()
 export class TasksGateway {
   @WebSocketServer()
   server: Server;

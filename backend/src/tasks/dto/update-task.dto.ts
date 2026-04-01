@@ -1,6 +1,11 @@
 import { IsString, IsOptional, MaxLength, IsEnum, IsNumber } from "class-validator";
 import { Transform } from "class-transformer";
-import { TaskStatus } from "@prisma/client";
+
+export enum TaskStatus {
+  TODO = "TODO",
+  IN_PROGRESS = "IN_PROGRESS",
+  DONE = "DONE",
+}
 
 export class UpdateTaskDto {
   @Transform(({ value }) => value?.trim())
