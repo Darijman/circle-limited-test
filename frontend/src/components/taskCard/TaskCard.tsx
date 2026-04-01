@@ -43,7 +43,7 @@ export const TaskCard = ({ task, onDelete, isDragging = false }: Props) => {
             <HolderOutlined />
           </span>
 
-          <Tooltip title={task.title}>
+          <Tooltip title={task.title} mouseEnterDelay={0.5}>
             <div
               style={{
                 flex: 1,
