@@ -6,12 +6,16 @@ import { GetUserTasksDto } from "./dto/get-user-tasks.dto";
 import { GetUserTasksResponse } from "./types/get-user-tasks.response";
 import { toTaskResponse } from "./mappers/task.mapper";
 import { TaskResponse } from "./types/task.response";
+import { TasksEmitter } from "src/realtime/tasks/emitters/tasks.emitter";
 
 @Injectable()
 export class TasksService {
   private readonly logger = new Logger(TasksService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly tasksEmitter: TasksEmitter,
+  ) {}
 
   async getUserTasks(userId: string, dto: GetUserTasksDto): Promise<GetUserTasksResponse> {
     const { cursor, limit = 20 } = dto;
@@ -82,7 +86,13 @@ export class TasksService {
     }
 
     const task = await this.prisma.task.findFirst({ where: { id, userId } });
-    return toTaskResponse(task!);
+    if (!task) {
+      this.logger.error(`Task missing after update: id=${id}`);
+      throw new NotFoundException("Task not found");
+    }
+
+    this.tasksEmitter.emitTaskUpdated(task.id, task.status);
+    return toTaskResponse(task);
   }
 
   async removeById(userId: string, id: string): Promise<boolean> {
@@ -95,6 +105,7 @@ export class TasksService {
       throw new NotFoundException("Task not found");
     }
 
+    this.tasksEmitter.emitTaskDeleted(id);
     return true;
   }
 }
