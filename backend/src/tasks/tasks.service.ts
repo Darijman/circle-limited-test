@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException, Logger, ForbiddenException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateTaskDto } from "./dto/create-task.dto";
 import { UpdateTaskDto } from "./dto/update-task.dto";
@@ -18,12 +18,12 @@ export class TasksService {
   ) {}
 
   async getUserTasks(userId: string, dto: GetUserTasksDto): Promise<GetUserTasksResponse> {
-    const { cursor, limit = 20 } = dto;
+    const { cursor, limit } = dto;
 
     const tasks = await this.prisma.task.findMany({
       where: { userId },
-      orderBy: { createdAt: "desc" },
-      take: limit + 1,
+      orderBy: { order: "desc" },
+      take: limit ? limit + 1 : undefined,
       ...(cursor && {
         cursor: { id: cursor },
         skip: 1,
@@ -32,13 +32,14 @@ export class TasksService {
         id: true,
         title: true,
         description: true,
+        order: true,
         status: true,
         createdAt: true,
         updatedAt: true,
       },
     });
 
-    const hasNextPage = tasks.length > limit;
+    const hasNextPage = limit ? tasks.length > limit : false;
     const data = hasNextPage ? tasks.slice(0, -1) : tasks;
 
     return {
@@ -48,11 +49,20 @@ export class TasksService {
   }
 
   async create(userId: string, dto: CreateTaskDto): Promise<TaskResponse> {
+    const lastTask = await this.prisma.task.findFirst({
+      where: { userId },
+      orderBy: { order: "desc" },
+      select: { order: true },
+    });
+
+    const newOrder = lastTask ? lastTask.order + 1000 : 1000;
+
     const task = await this.prisma.task.create({
       data: {
         title: dto.title,
         description: dto.description?.trim() || null,
         userId,
+        order: newOrder,
       },
     });
 
@@ -75,23 +85,22 @@ export class TasksService {
       throw new BadRequestException("Empty update");
     }
 
-    const result = await this.prisma.task.updateMany({
-      where: { id, userId },
+    const existing = await this.prisma.task.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException("Task not found");
+    }
+
+    if (existing.userId !== userId) {
+      this.logger.warn(`Forbidden update attempt: taskId=${id}, userId=${userId}`);
+      throw new ForbiddenException("Access denied");
+    }
+
+    const task = await this.prisma.task.update({
+      where: { id },
       data: dto,
     });
 
-    if (result.count === 0) {
-      this.logger.warn(`Update failed: taskId=${id}`);
-      throw new NotFoundException("Task not found");
-    }
-
-    const task = await this.prisma.task.findFirst({ where: { id, userId } });
-    if (!task) {
-      this.logger.error(`Task missing after update: id=${id}`);
-      throw new NotFoundException("Task not found");
-    }
-
-    this.tasksEmitter.emitTaskUpdated(task.id, task.status);
+    this.tasksEmitter.emitTaskUpdated(task.id, task.status, task.order);
     return toTaskResponse(task);
   }
 

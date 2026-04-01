@@ -5,6 +5,7 @@ export const toTaskResponse = (task: Task): TaskResponse => ({
   id: task.id,
   title: task.title,
   description: task.description,
+  order: task.order,
   status: task.status,
   createdAt: task.createdAt,
   updatedAt: task.updatedAt,

@@ -8,10 +8,11 @@ import { TaskDeletedEvent } from "../events/task-deleted.event";
 export class TasksEmitter {
   constructor(private readonly gateway: TasksGateway) {}
 
-  emitTaskUpdated(taskId: string, status: TaskStatus) {
+  emitTaskUpdated(taskId: string, status: TaskStatus, order: number) {
     const event: TaskUpdatedEvent = {
       id: taskId,
       status,
+      order,
       timestamp: new Date().toISOString(),
     };
 

@@ -11,7 +11,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   app.enableCors({
-    origin: configService.get<string>("CLIENT_URL") || "http://localhost:9000",
+    origin: configService.get<string>("CLIENT_URL") || "http://localhost:5173",
     credentials: true,
   });
 

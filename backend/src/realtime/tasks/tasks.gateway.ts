@@ -9,7 +9,10 @@ export const TaskEvents = {
 } as const;
 
 @WebSocketGateway({
-  cors: { origin: "*" },
+  cors: {
+    origin: "http://localhost:5173",
+    credentials: true,
+  },
 })
 export class TasksGateway {
   @WebSocketServer()

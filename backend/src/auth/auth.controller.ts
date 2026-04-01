@@ -30,8 +30,18 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Get("me")
-  async me(@CurrentUser() user: JwtPayload) {
+  async me(@CurrentUser() user: JwtPayload): Promise<JwtPayload> {
     return user;
+  }
+
+  @UseGuards(AuthGuard)
+  @Post("logout")
+  logout(@Res({ passthrough: true }) res: Response): void {
+    res.clearCookie("access_token", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+    });
   }
 
   private setCookie(res: Response, token: string) {

@@ -1,4 +1,4 @@
-import { IsString, IsOptional, MaxLength, IsEnum } from "class-validator";
+import { IsString, IsOptional, MaxLength, IsEnum, IsNumber } from "class-validator";
 import { Transform } from "class-transformer";
 import { TaskStatus } from "@prisma/client";
 
@@ -18,4 +18,9 @@ export class UpdateTaskDto {
   @IsEnum(TaskStatus, { message: "Invalid status value" })
   @IsOptional()
   status?: TaskStatus;
+
+  @Transform(({ value }) => Number(value))
+  @IsNumber({}, { message: "Order must be a number" })
+  @IsOptional()
+  order?: number;
 }

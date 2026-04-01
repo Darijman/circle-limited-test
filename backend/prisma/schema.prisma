@@ -32,6 +32,8 @@ model Task {
 
   status      TaskStatus @default(TODO)
 
+  order     Float  
+
   userId      String
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
