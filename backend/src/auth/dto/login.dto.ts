@@ -13,6 +13,8 @@ export class LoginDto {
   @MinLength(6, { message: "Password must be at least 6 characters" })
   @MaxLength(100, { message: "Password is too long" })
   @IsNotEmpty({ message: "Password is required" })
-  @Matches(/^[^\s]+$/, { message: "Password must not contain spaces" })
+  @Matches(/^(?=.*[A-Za-z])(?=.*\d)[^\s]+$/, {
+    message: "Password must contain at least one letter and one number",
+  })
   password: string;
 }

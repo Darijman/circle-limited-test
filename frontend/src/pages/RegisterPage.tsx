@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { register } from "../api/auth.api";
 import { useAuth } from "../providers/AuthProvider";
 import { useState } from "react";
+import type { AxiosError } from "axios";
 
 const { Text } = Typography;
 
@@ -34,8 +35,10 @@ export default function RegisterPage() {
 
       await refetchUser();
       navigate("/");
-    } catch (error: any) {
-      messageApi.error(error?.response?.data?.message || "Registration failed");
+    } catch (error: unknown) {
+      const err = error as AxiosError<{ message?: string }>;
+
+      messageApi.error(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }

@@ -8,7 +8,7 @@ import { connectSocket, disconnectSocket, socket } from "../ws/socket";
 import { logout } from "../api/auth.api";
 import { TaskCard } from "../components/taskCard/TaskCard";
 import { Column } from "../components/column/Column";
-import type { DragEndEvent } from "@dnd-kit/core";
+import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 
 const { Title } = Typography;
 
@@ -54,7 +54,7 @@ export default function TasksPage() {
     };
   }, []);
 
-  const handleDragStart = (event: any) => {
+  const handleDragStart = (event: DragStartEvent) => {
     const task = tasks.find((t) => t.id === event.active.id);
     if (task) setActiveTask(task);
   };
