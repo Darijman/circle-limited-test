@@ -8,6 +8,8 @@
 * **Realtime:** WebSocket (Socket.IO)
 * **Infrastructure:** Docker + Docker Compose + Nginx
 
+---
+
 ## 📁 Project Structure
 
 ```
@@ -55,10 +57,27 @@ docker compose up --build
 
 ### 2. Application URLs
 
-| Service  | URL                       |
-| -------- | ------------------------- |
-| Frontend | http://localhost:3000     |
-| Backend  | http://localhost:9000     |
+| Service  | URL                   |
+| -------- | --------------------- |
+| Frontend | http://localhost:3000 |
+| Backend  | http://localhost:9000 |
 
 ---
 
+## ✅ Implemented Features
+
+* WebSocket realtime updates (changes visible in multiple browser sessions)
+* JWT authentication (login / register / protected routes)
+* Full CRUD for tasks
+* Input validation (class-validator + frontend validation)
+* Clean project structure and readable code
+* TypeScript without `any`
+* Dockerized environment (frontend, backend, database)
+
+---
+
+## ⚠️ Not Implemented
+
+* Unit tests (optional requirement)
+
+---
